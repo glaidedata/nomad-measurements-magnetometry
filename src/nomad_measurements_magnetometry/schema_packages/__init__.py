@@ -6,7 +6,9 @@ class NewSchemaPackageEntryPoint(SchemaPackageEntryPoint):
     parameter: int = Field(0, description='Custom configuration parameter')
 
     def load(self):
-        from nomad_measurements_magnetometry.schema_packages.schema_package import m_package
+        from nomad_measurements_magnetometry.schema_packages.schema_package import (
+            m_package,
+        )
 
         return m_package
 
