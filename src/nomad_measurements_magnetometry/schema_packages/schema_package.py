@@ -1,38 +1,277 @@
-from typing import (
-    TYPE_CHECKING,
-)
+from typing import TYPE_CHECKING
+
+import numpy as np
+from nomad.datamodel.data import ArchiveSection, EntryData
+from nomad.datamodel.metainfo.annotations import ELNAnnotation, ELNComponentEnum
+from nomad.datamodel.metainfo.basesections import Measurement, MeasurementResult
+from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
+
+# Import external reader
+from readers_ientrance import read_lakeshore_vsm
 
 if TYPE_CHECKING:
-    from nomad.datamodel.datamodel import (
-        EntryArchive,
-    )
-    from structlog.stdlib import (
-        BoundLogger,
-    )
-
-from nomad.config import config
-from nomad.datamodel.data import Schema
-from nomad.datamodel.metainfo.annotations import ELNAnnotation, ELNComponentEnum
-from nomad.metainfo import Quantity, SchemaPackage
-
-configuration = config.get_plugin_entry_point(
-    'nomad_measurements_magnetometry.schema_packages:schema_package_entry_point'
-)
+    from nomad.datamodel.datamodel import EntryArchive
+    from structlog.stdlib import BoundLogger
 
 m_package = SchemaPackage()
 
 
-class NewSchemaPackage(Schema):
-    name = Quantity(
-        type=str, a_eln=ELNAnnotation(component=ELNComponentEnum.StringEditQuantity)
+# --- 1. Subsections ---
+class FieldConfigurations(ArchiveSection):
+    magnet_model = Quantity(type=str)
+    power_supply = Quantity(type=str)
+    magnet_mode = Quantity(type=str)
+    head_amplitude = Quantity(type=str)
+    gap_settings = Quantity(type=str)
+    coil_set_name = Quantity(type=str)
+    coil_set_serial_number = Quantity(type=str)
+    coil_set_balance_number = Quantity(type=np.float64)
+    moment_x_calibration_value = Quantity(type=np.float64, description='emu/volt')
+    moment_x_calibration_field = Quantity(type=np.float64, description='Oe')
+    moment_x_calibration_expected_moment = Quantity(type=np.float64, description='emu')
+    moment_x_calibration_standard_id = Quantity(type=str)
+    moment_x_calibration_comments = Quantity(type=str)
+
+
+class SampleSettings(ArchiveSection):
+    sample_id = Quantity(type=str)
+    volume = Quantity(type=np.float64, unit='cm**3')
+    area = Quantity(type=np.float64, unit='cm**2')
+    mass = Quantity(type=np.float64, unit='g')
+    density = Quantity(type=np.float64, unit='g/cm**3')
+    thickness = Quantity(type=np.float64, unit='mm')
+    demagnetization_factor_in_si = Quantity(type=np.float64)
+    demagnetization_factor_in_cgs = Quantity(type=np.float64)
+
+
+class AdvancedAcquisitionSetup(ArchiveSection):
+    acquisition_mode = Quantity(type=str)
+    pause_at_plus_minus_max_fields = Quantity(type=np.float64, unit='s')
+    moment_meter_range_mode = Quantity(type=str)
+    gaussmeter_range_mode = Quantity(type=str)
+    gaussmeter_fixed_range = Quantity(type=str)
+
+
+class AcquisitionSetup(ArchiveSection):
+    saturation_field = Quantity(type=str)
+    max_field = Quantity(type=str)
+    forc_type = Quantity(type=str)
+    max_hc_field = Quantity(type=np.float64, description='Oe')
+    max_hu_field = Quantity(type=np.float64, description='Oe')
+    min_hu_field = Quantity(type=np.float64, description='Oe')
+    calibration_field_tolerance = Quantity(type=str)
+    pause_at_calibration_field = Quantity(type=np.float64, unit='s')
+    number_of_forcs = Quantity(type=np.int32)
+    saturation_field_tolerance = Quantity(type=str)
+    pause_at_saturation_field = Quantity(type=np.float64, unit='s')
+    reversal_field_tolerance = Quantity(type=str)
+    pause_at_reversal_fields = Quantity(type=np.float64, unit='s')
+    enable_subtract_last_branches = Quantity(type=bool)
+    last_branch_iterations = Quantity(type=np.int32)
+    field_step_size = Quantity(type=np.float64, description='Oe')
+    include_initial_curve = Quantity(type=bool)
+    averaging_time = Quantity(type=np.float64, unit='s')
+    show_forc_diagram_on_the_fly = Quantity(type=bool)
+    smoothing_factor = Quantity(type=np.float64)
+    rotate_45_degrees = Quantity(type=bool)
+    truncate_for_a_rectangle_diagram = Quantity(type=bool)
+    number_of_contours = Quantity(type=np.int32)
+    correct_for_drift = Quantity(type=bool)
+    advanced_acquisition_setup = SubSection(sub_section=AdvancedAcquisitionSetup)
+
+
+class DisplaySetup(ArchiveSection):
+    x_axis = Quantity(type=str)
+    left_y_axis = Quantity(type=str)
+    right_y_axis = Quantity(type=str)
+
+
+# --- 2. Main Sections ---
+class VSMResult(MeasurementResult):
+    m_def = Section()
+    step_array = Quantity(type=np.int32, shape=['*'])
+    iteration_array = Quantity(type=np.int32, shape=['*'])
+    segment_array = Quantity(type=np.int32, shape=['*'])
+    magnetic_field = Quantity(
+        type=np.float64, shape=['*'], description='Applied magnetic field (Oe)'
     )
-    message = Quantity(type=str)
+    magnetic_moment = Quantity(
+        type=np.float64, shape=['*'], description='Measured magnetic moment (emu)'
+    )
+    time_stamp = Quantity(type=np.float64, shape=['*'], unit='s')
+    field_status = Quantity(type=str, shape=['*'])
+    moment_status = Quantity(type=str, shape=['*'])
 
-    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger') -> None:
+
+class VibratingSampleMagnetometry(Measurement):
+    m_def = Section()
+    method = Quantity(type=str, default='Vibrating Sample Magnetometry (VSM)')
+    software_version = Quantity(type=str)
+    measurement_method = Quantity(type=str, description='FORC or HYSTERESIS')
+    start_time = Quantity(type=str)
+    finish_time = Quantity(type=str)
+
+    field_configurations = SubSection(sub_section=FieldConfigurations)
+    sample_settings = SubSection(sub_section=SampleSettings)
+    acquisition_setup = SubSection(sub_section=AcquisitionSetup)
+    display_setup = SubSection(sub_section=DisplaySetup)
+
+    results = Measurement.results.m_copy()
+    results.section_def = VSMResult
+
+
+class ELNVibratingSampleMagnetometry(VibratingSampleMagnetometry, EntryData):
+    m_def = Section(label='Vibrating Sample Magnetometry (VSM)')
+    data_file = Quantity(
+        type=str,
+        a_eln=ELNAnnotation(component=ELNComponentEnum.FileEditQuantity),
+    )
+
+    def _get_cleaners(self, metadata):
+        """Returns cleaning utilities for the mapping process."""
+
+        def clean_float(key, strip_str=None):
+            val = metadata.get(key)
+            if val:
+                if strip_str:
+                    val = val.replace(strip_str, '')
+                try:
+                    return float(val.strip())
+                except ValueError:
+                    return None
+            return None
+
+        def clean_int(key):
+            val = metadata.get(key)
+            if val:
+                try:
+                    return int(val.strip())
+                except ValueError:
+                    return None
+            return None
+
+        def clean_bool(key):
+            val = metadata.get(key, '').strip().lower()
+            return val == 'true' if val in ['true', 'false'] else None
+
+        return clean_float, clean_int, clean_bool
+
+    def _map_acquisition_and_display(self, metadata, cleaners):
+        """Maps acquisition and display setups."""
+        cf, ci, cb = cleaners
+
+        acq = AcquisitionSetup()
+        acq.saturation_field = metadata.get('Saturation field')
+        acq.max_field = metadata.get('Max field')
+        acq.forc_type = metadata.get('FORC type')
+        acq.max_hc_field = cf('Max Hc field', 'Oe')
+        acq.max_hu_field = cf('Max Hu field', 'Oe')
+        acq.min_hu_field = cf('Min Hu field', 'Oe')
+        acq.calibration_field_tolerance = metadata.get('Calibration field tolerance')
+        acq.pause_at_calibration_field = cf('Pause at calibration field', 's')
+        acq.number_of_forcs = ci('Number of FORCs')
+        acq.saturation_field_tolerance = metadata.get('Saturation field tolerance')
+        acq.pause_at_saturation_field = cf('Pause at saturation field', 's')
+        acq.reversal_field_tolerance = metadata.get('Reversal field tolerance')
+        acq.pause_at_reversal_fields = cf('Pause at reversal fields', 's')
+        acq.enable_subtract_last_branches = cb('Enable subtract Last branches')
+        acq.last_branch_iterations = ci('Last branch iterations')
+        acq.field_step_size = cf('Field_step size', 'Oe')
+        acq.include_initial_curve = cb('Include initial curve')
+        acq.averaging_time = cf('Averaging time', 's')
+        acq.show_forc_diagram_on_the_fly = cb('Show FORC diagram on the fly')
+        acq.smoothing_factor = cf('Smoothing factor')
+        acq.rotate_45_degrees = cb('Rotate 45 degrees')
+        acq.truncate_for_a_rectangle_diagram = cb('Truncate for a rectangle diagram')
+        acq.number_of_contours = ci('Number of contours')
+        acq.correct_for_drift = cb('Correct for drift')
+
+        adv = AdvancedAcquisitionSetup()
+        adv.acquisition_mode = metadata.get('Acquisition mode')
+        adv.pause_at_plus_minus_max_fields = cf('Pause at +/- max fields', 's')
+        adv.moment_meter_range_mode = metadata.get('Moment meter range mode')
+        adv.gaussmeter_range_mode = metadata.get('Gaussmeter range mode')
+        adv.gaussmeter_fixed_range = metadata.get('Gaussmeter fixed range')
+        acq.advanced_acquisition_setup = adv
+        self.acquisition_setup = acq
+
+        ds = DisplaySetup()
+        ds.x_axis = metadata.get('X axis')
+        ds.left_y_axis = metadata.get('Left Y axis')
+        ds.right_y_axis = metadata.get('Right Y axis')
+        self.display_setup = ds
+
+    def _map_sample_and_configs(self, metadata, cleaners):
+        """Maps sample settings and field configurations."""
+        cf, _, _ = cleaners
+
+        fc = FieldConfigurations()
+        fc.magnet_model = metadata.get('Magnet')
+        fc.power_supply = metadata.get('Power supply')
+        fc.magnet_mode = metadata.get('Magnet mode')
+        fc.head_amplitude = metadata.get('Head amplitude')
+        fc.gap_settings = metadata.get('Gap settings')
+        fc.coil_set_name = metadata.get('Coil set name')
+        fc.coil_set_serial_number = metadata.get('Coil set serial number')
+        fc.coil_set_balance_number = cf('Coil set balance number')
+        fc.moment_x_calibration_value = cf('Moment X calibration value', 'emu/volt')
+        fc.moment_x_calibration_field = cf('Moment X calibration field', 'Oe')
+        fc.moment_x_calibration_expected_moment = cf(
+            'Moment X calibration expected moment', 'emu'
+        )
+        fc.moment_x_calibration_standard_id = metadata.get(
+            'Moment X calibration standard ID'
+        )
+        fc.moment_x_calibration_comments = metadata.get('Moment X calibration comments')
+        self.field_configurations = fc
+
+        ss = SampleSettings()
+        ss.sample_id = metadata.get('ID')
+        ss.volume = cf('Volume', 'cm³')
+        ss.area = cf('Area', 'cm²')
+        ss.mass = cf('Mass', 'g')
+        ss.density = cf('Density', 'g/cm³')
+        ss.thickness = cf('Thickness', 'mm')
+        ss.demagnetization_factor_in_si = cf('Demagnetization factor in SI')
+        ss.demagnetization_factor_in_cgs = cf('Demagnetization factor in cgs')
+        self.sample_settings = ss
+
+    def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger'):
+        if not self.data_file:
+            super().normalize(archive, logger)
+            return
+
+        try:
+            with archive.m_context.raw_file(self.data_file) as file:
+                vsm_data = read_lakeshore_vsm(file.name)
+
+            cleaners = self._get_cleaners(vsm_data.metadata)
+
+            self.software_version = vsm_data.metadata.get('Software Version')
+            self.measurement_method = vsm_data.metadata.get('Measurement Type')
+            self.start_time = vsm_data.metadata.get('START TIME')
+            self.finish_time = vsm_data.metadata.get('FINISH TIME')
+
+            self._map_sample_and_configs(vsm_data.metadata, cleaners)
+            self._map_acquisition_and_display(vsm_data.metadata, cleaners)
+
+            if not self.results:
+                self.results = [VSMResult()]
+
+            res = self.results[0]
+            res.step_array = vsm_data.step
+            res.iteration_array = vsm_data.iteration
+            res.segment_array = vsm_data.segment
+            res.magnetic_field = vsm_data.magnetic_field
+            res.magnetic_moment = vsm_data.magnetic_moment
+            res.time_stamp = vsm_data.time_stamp
+            res.field_status = vsm_data.field_status
+            res.moment_status = vsm_data.moment_status
+
+        except Exception as e:
+            logger.error(f'Error parsing VSM file: {e}')
+
         super().normalize(archive, logger)
-
-        logger.info('NewSchema.normalize', parameter=configuration.parameter)
-        self.message = f'Hello {self.name}!'
 
 
 m_package.__init_metainfo__()
