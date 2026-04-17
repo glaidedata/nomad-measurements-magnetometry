@@ -1,18 +1,16 @@
 from nomad.config.models.plugins import ParserEntryPoint
-from pydantic import Field
 
 
 class NewParserEntryPoint(ParserEntryPoint):
-    parameter: int = Field(0, description='Custom configuration parameter')
-
     def load(self):
-        from nomad_measurements_magnetometry.parsers.parser import NewParser
+        from nomad_measurements_magnetometry.parsers.parser import VSMParser
 
-        return NewParser(**self.model_dump())
+        return VSMParser(**self.model_dump())
 
 
 parser_entry_point = NewParserEntryPoint(
-    name='NewParser',
-    description='New parser entry point configuration.',
-    mainfile_name_re=r'.*\.newmainfilename',
+    name='VSM Parser',
+    description='Parser for Vibrating Sample Magnetometry (VSM) raw files.',
+    mainfile_name_re=r'^.*\.csv$',
+    mainfile_mime_re='text/csv|text/plain',
 )
