@@ -4,8 +4,12 @@ from typing import TYPE_CHECKING
 from nomad.datamodel.context import ServerContext
 from nomad.parsing import MatchingParser
 
-from nomad_measurements_magnetometry.schema_packages.vsm_schema import ELNVibratingSampleMagnetometry
-from nomad_measurements_magnetometry.schema_packages.agm_schema import ELNAlternatingGradientMagnetometry
+from nomad_measurements_magnetometry.schema_packages.agm_schema import (
+    ELNAlternatingGradientMagnetometry,
+)
+from nomad_measurements_magnetometry.schema_packages.vsm_schema import (
+    ELNVibratingSampleMagnetometry,
+)
 
 if TYPE_CHECKING:
     from nomad.datamodel.datamodel import EntryArchive
@@ -13,12 +17,21 @@ if TYPE_CHECKING:
 
 
 class MagnetometryParser(MatchingParser):
-    def is_mainfile(self, filename: str, mime: str, buffer: bytes, decoded_buffer: str, compression: str = None) -> bool:
+    def is_mainfile(
+        self,
+        filename: str,
+        mime: str,
+        buffer: bytes,
+        decoded_buffer: str,
+        compression: str = None,
+    ) -> bool:
         """
         Gatekeeper: Only returns True if the file contains VSM or AGM magic strings.
         """
         # 1. Standard regex check (handles the .csv and .txt extensions)
-        is_valid_ext = super().is_mainfile(filename, mime, buffer, decoded_buffer, compression)
+        is_valid_ext = super().is_mainfile(
+            filename, mime, buffer, decoded_buffer, compression
+        )
         if not is_valid_ext:
             return False
 
@@ -50,7 +63,7 @@ class MagnetometryParser(MatchingParser):
 
         # --- The Router Logic ---
         # Read the first chunk of the file to securely identify the signature
-        with open(mainfile, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(mainfile, encoding='utf-8', errors='ignore') as f:
             header_chunk = f.read(1024)
 
         if 'MicroMag 2900/3900 Data File' in header_chunk:
@@ -59,7 +72,9 @@ class MagnetometryParser(MatchingParser):
             entry = ELNVibratingSampleMagnetometry()
         else:
             if logger:
-                logger.error(f"Unrecognized file signature in {data_file}. No schema assigned.")
+                logger.error(
+                    f'Unrecognized file signature in {data_file}. No schema assigned.'
+                )
             return
 
         # Attach the file to the chosen schema

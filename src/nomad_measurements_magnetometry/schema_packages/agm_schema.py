@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
-import numpy as np
 
+import numpy as np
 from nomad.datamodel.data import ArchiveSection, EntryData
 from nomad.datamodel.metainfo.annotations import ELNComponentEnum
 from nomad.datamodel.metainfo.basesections import Measurement, MeasurementResult
@@ -17,6 +17,7 @@ m_package = SchemaPackage()
 
 # --- 1. Subsections ---
 
+
 class AGMInstrument(ArchiveSection):
     configuration = Quantity(type=str)
     temperature_control = Quantity(type=str)
@@ -25,10 +26,12 @@ class AGMInstrument(ArchiveSection):
     units_of_measure = Quantity(type=str)
     temperature_in = Quantity(type=str)
 
+
 class AGMSample(ArchiveSection):
     mass = Quantity(type=np.float64, description='g')
     volume = Quantity(type=np.float64, description='cm³')
     demagnetizing_factor = Quantity(type=np.float64)
+
 
 class AGMSettings(ArchiveSection):
     field_range = Quantity(type=np.float64, description='Oe')
@@ -45,6 +48,7 @@ class AGMSettings(ArchiveSection):
     operating_frequency = Quantity(type=np.float64, description='Hz')
     sweep_mode = Quantity(type=str)
 
+
 class AGMMeasurementDetails(ArchiveSection):
     description = Quantity(type=str)
     field_measured = Quantity(type=np.float64)
@@ -52,6 +56,7 @@ class AGMMeasurementDetails(ArchiveSection):
     averages_completed = Quantity(type=np.float64)
     measured_on = Quantity(type=str)
     elapsed_time = Quantity(type=np.float64, unit='s')
+
 
 class AGMProcessing(ArchiveSection):
     background_subtraction = Quantity(type=str)
@@ -64,6 +69,7 @@ class AGMProcessing(ArchiveSection):
     pole_saturation = Quantity(type=str)
     slope_correction = Quantity(type=str)
 
+
 class AGMViewport(ArchiveSection):
     left = Quantity(type=np.float64)
     right = Quantity(type=np.float64)
@@ -72,6 +78,7 @@ class AGMViewport(ArchiveSection):
     show_x_axis = Quantity(type=str)
     show_y_axis = Quantity(type=str)
 
+
 class AGMCharacterization(ArchiveSection):
     initial_slope = Quantity(type=np.float64)
     saturation = Quantity(type=np.float64)
@@ -79,32 +86,37 @@ class AGMCharacterization(ArchiveSection):
     coercivity = Quantity(type=np.float64)
     s_star = Quantity(type=np.float64)
 
+
 class AGMScriptSegment(ArchiveSection):
     segment_number = Quantity(type=int)
     averaging_time = Quantity(type=np.float64, unit='s')
-    initial_field = Quantity(type=np.float64, unit='Oe')
-    field_increment = Quantity(type=np.float64, unit='Oe')
-    final_field = Quantity(type=np.float64, unit='Oe')
+    initial_field = Quantity(type=np.float64, description='Oe')
+    field_increment = Quantity(type=np.float64, description='Oe')
+    final_field = Quantity(type=np.float64, description='Oe')
     pause = Quantity(type=np.float64, unit='s')
     final_index = Quantity(type=int)
+
 
 class AGMScript(ArchiveSection):
     number_of_segments = Quantity(type=int)
     number_of_data = Quantity(type=int)
     segments = SubSection(section_def=AGMScriptSegment, repeats=True)
 
+
 class AGMResult(MeasurementResult):
-    magnetic_field = Quantity(type=np.float64, shape=['*'], unit='Oe')
-    magnetic_moment = Quantity(type=np.float64, shape=['*'], unit='emu')
+    magnetic_field = Quantity(type=np.float64, shape=['*'], description='Oe')
+    magnetic_moment = Quantity(type=np.float64, shape=['*'], description='emu')
     normalized_moment = Quantity(type=np.float64, shape=['*'])
 
 
 # --- 2. Main Schema ---
 
+
 class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
     """
     Schema for MicroMag Alternating Gradient Magnetometry (AGM) data.
     """
+
     m_def = Section(
         a_eln=dict(lane_width='600px'),
         a_template=dict(measurement_identifiers=dict()),
@@ -161,14 +173,14 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
                 hardware_version=metadata.get('Hardware version'),
                 software_version=metadata.get('Software version'),
                 units_of_measure=metadata.get('Units of measure'),
-                temperature_in=metadata.get('Temperature in')
+                temperature_in=metadata.get('Temperature in'),
             )
 
         if not self.sample_setup:
             self.sample_setup = AGMSample(
                 mass=safe_float(metadata.get('Mass')),
                 volume=safe_float(metadata.get('Volume')),
-                demagnetizing_factor=safe_float(metadata.get('Demagnetizing factor'))
+                demagnetizing_factor=safe_float(metadata.get('Demagnetizing factor')),
             )
 
         if not self.settings:
@@ -178,24 +190,26 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
                 moment_range=safe_float(metadata.get('Moment range')),
                 averaging_time=safe_float(metadata.get('Averaging time')),
                 temperature_command=safe_float(metadata.get('Temperature (command)')),
-                tmprtr_difference_correction=metadata.get('Tmprtr difference correction'),
+                tmprtr_difference_correction=metadata.get(
+                    'Tmprtr difference correction'
+                ),
                 orientation=metadata.get('Orientation'),
                 gradient=safe_float(metadata.get('Gradient')),
                 probe_factor=safe_float(metadata.get('Probe factor')),
                 probe_q=safe_float(metadata.get('Probe Q')),
                 probe_resonance=safe_float(metadata.get('Probe resonance')),
                 operating_frequency=safe_float(metadata.get('Operating frequency')),
-                sweep_mode=metadata.get('Sweep mode')
+                sweep_mode=metadata.get('Sweep mode'),
             )
 
         if not self.measurement_details:
             self.measurement_details = AGMMeasurementDetails(
-                description=metadata.get('Description', "").strip('"'),
+                description=metadata.get('Description', '').strip('"'),
                 field_measured=safe_float(metadata.get('Field (measured)')),
                 temperature_measured=safe_float(metadata.get('Temperature (measured)')),
                 averages_completed=safe_float(metadata.get('Averages (completed)')),
                 measured_on=metadata.get('Measured on'),
-                elapsed_time=safe_float(metadata.get('Elapsed time'))
+                elapsed_time=safe_float(metadata.get('Elapsed time')),
             )
 
         if not self.processing:
@@ -208,7 +222,7 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
                 offset_field=metadata.get('Offset (field)'),
                 offset_moment=metadata.get('Offset (moment)'),
                 pole_saturation=metadata.get('Pole saturation'),
-                slope_correction=metadata.get('Slope correction')
+                slope_correction=metadata.get('Slope correction'),
             )
 
         if not self.viewport:
@@ -218,7 +232,7 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
                 bottom=safe_float(metadata.get('Bottom')),
                 top=safe_float(metadata.get('Top')),
                 show_x_axis=metadata.get('Show X-axis?'),
-                show_y_axis=metadata.get('Show Y-axis?')
+                show_y_axis=metadata.get('Show Y-axis?'),
             )
 
         if not self.characterization:
@@ -227,13 +241,13 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
                 saturation=safe_float(metadata.get('Saturation')),
                 remanence=safe_float(metadata.get('Remanence')),
                 coercivity=safe_float(metadata.get('Coercivity')),
-                s_star=safe_float(metadata.get('S*'))
+                s_star=safe_float(metadata.get('S*')),
             )
 
         if not self.script:
             self.script = AGMScript(
                 number_of_segments=safe_int(metadata.get('Number of segments')),
-                number_of_data=safe_int(metadata.get('Number of data'))
+                number_of_data=safe_int(metadata.get('Number of data')),
             )
 
     def normalize(self, archive: 'EntryArchive', logger: 'BoundLogger'):
@@ -248,10 +262,10 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
             cleaners = self._get_cleaners()
             metadata = agm_data.metadata
 
-            self.instrument_model = metadata.get("Instrument Model")
-            self.data_format_version = metadata.get("Data Format Version")
-            self.measurement_type = metadata.get("Measurement Type")
-            self.measurement_mode = metadata.get("Measurement Mode")
+            self.instrument_model = metadata.get('Instrument Model')
+            self.data_format_version = metadata.get('Data Format Version')
+            self.measurement_type = metadata.get('Measurement Type')
+            self.measurement_mode = metadata.get('Measurement Mode')
             self.time = metadata.get('Measured on')
 
             self._map_metadata(metadata, cleaners)
@@ -267,7 +281,7 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
                         field_increment=float(row['Field Increment (Oe)']),
                         final_field=float(row['Final Field (Oe)']),
                         pause=float(row['Pause (s)']),
-                        final_index=int(row['Final Index'])
+                        final_index=int(row['Final Index']),
                     )
                     segments_list.append(seg)
                 self.script.segments = segments_list
@@ -286,5 +300,6 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
             raise e
 
         super().normalize(archive, logger)
+
 
 m_package.__init_metainfo__()

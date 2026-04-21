@@ -1,9 +1,14 @@
 from nomad.config.models.plugins import SchemaPackageEntryPoint
 
+
 class MagnetometrySchemaPackageEntryPoint(SchemaPackageEntryPoint):
     def load(self):
-        from nomad_measurements_magnetometry.schema_packages.vsm_schema import m_package as vsm_pkg
-        from nomad_measurements_magnetometry.schema_packages.agm_schema import m_package as agm_pkg
+        from nomad_measurements_magnetometry.schema_packages.agm_schema import (
+            m_package as agm_pkg,
+        )
+        from nomad_measurements_magnetometry.schema_packages.vsm_schema import (
+            m_package as vsm_pkg,
+        )
 
         return vsm_pkg, agm_pkg
 
