@@ -130,7 +130,8 @@ where = ["src"]
 
 [project.entry-points.'nomad.plugin']
 parser_entry_point = "nomad_measurements_magnetometry.parsers:parser_entry_point"
-schema_package_entry_point = "nomad_measurements_magnetometry.schema_packages:schema_package_entry_point"
+agm_schema_entry_point = "nomad_measurements_magnetometry.schema_packages:agm_schema_entry_point"
+vsm_schema_entry_point = "nomad_measurements_magnetometry.schema_packages:vsm_schema_entry_point"
 
 
 

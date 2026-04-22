@@ -13,10 +13,10 @@ if TYPE_CHECKING:
     from nomad.datamodel.datamodel import EntryArchive
     from structlog.stdlib import BoundLogger
 
-from nomad_measurements_magnetometry.schema_packages import m_package
+from nomad.metainfo import SchemaPackage
+m_package = SchemaPackage()
 
 # --- 1. Subsections ---
-
 
 class AGMInstrument(ArchiveSection):
     configuration = Quantity(type=str)
@@ -50,7 +50,10 @@ class AGMSettings(ArchiveSection):
 
 
 class AGMMeasurementDetails(ArchiveSection):
-    description = Quantity(type=str)
+    description = Quantity(
+        type=str,
+        a_eln=dict(component=ELNComponentEnum.RichTextEditQuantity)
+    )
     field_measured = Quantity(type=np.float64)
     temperature_measured = Quantity(type=np.float64)
     averages_completed = Quantity(type=np.float64)
@@ -203,12 +206,16 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
             )
 
         if not self.measurement_details:
+            # Grab the time safely and cleanly
+            raw_time = metadata.get('Measured on')
+            clean_time = str(raw_time).strip() if raw_time and raw_time != 'N/A' else None
+
             self.measurement_details = AGMMeasurementDetails(
                 description=metadata.get('Description', '').strip('"'),
                 field_measured=safe_float(metadata.get('Field (measured)')),
                 temperature_measured=safe_float(metadata.get('Temperature (measured)')),
                 averages_completed=safe_float(metadata.get('Averages (completed)')),
-                measured_on=metadata.get('Measured on'),
+                measured_on=clean_time,
                 elapsed_time=safe_float(metadata.get('Elapsed time')),
             )
 
@@ -266,7 +273,6 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
             self.data_format_version = metadata.get('Data Format Version')
             self.measurement_type = metadata.get('Measurement Type')
             self.measurement_mode = metadata.get('Measurement Mode')
-            self.time = metadata.get('Measured on')
 
             self._map_metadata(metadata, cleaners)
 
@@ -300,6 +306,5 @@ class ELNAlternatingGradientMagnetometry(Measurement, EntryData):
             raise e
 
         super().normalize(archive, logger)
-
 
 m_package.__init_metainfo__()

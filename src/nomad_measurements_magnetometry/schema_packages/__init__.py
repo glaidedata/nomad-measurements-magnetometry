@@ -1,19 +1,21 @@
 from nomad.config.models.plugins import SchemaPackageEntryPoint
-from nomad.metainfo import SchemaPackage
 
-m_package = SchemaPackage()
-
-
-class MagnetometrySchemaPackageEntryPoint(SchemaPackageEntryPoint):
+class AGMSchemaEntryPoint(SchemaPackageEntryPoint):
     def load(self):
-        from . import agm_schema, vsm_schema
-
-        _ = (agm_schema, vsm_schema)
-
+        from .agm_schema import m_package
         return m_package
 
+class VSMSchemaEntryPoint(SchemaPackageEntryPoint):
+    def load(self):
+        from .vsm_schema import m_package
+        return m_package
 
-schema_package_entry_point = MagnetometrySchemaPackageEntryPoint(
-    name='Magnetometry Schemas',
-    description='Schemas for Magnetometry (VSM, AGM, etc) data.',
+agm_schema_entry_point = AGMSchemaEntryPoint(
+    name='AGM Schema',
+    description='Schema for MicroMag AGM data.',
+)
+
+vsm_schema_entry_point = VSMSchemaEntryPoint(
+    name='VSM Schema',
+    description='Schema for Lake Shore VSM data.',
 )

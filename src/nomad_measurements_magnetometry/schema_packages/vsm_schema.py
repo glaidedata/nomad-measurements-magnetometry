@@ -13,8 +13,8 @@ if TYPE_CHECKING:
     from nomad.datamodel.datamodel import EntryArchive
     from structlog.stdlib import BoundLogger
 
-from nomad_measurements_magnetometry.schema_packages import m_package
-
+from nomad.metainfo import SchemaPackage
+m_package = SchemaPackage()
 
 # --- 1. Subsections ---
 class FieldConfigurations(ArchiveSection):
@@ -272,6 +272,5 @@ class ELNVibratingSampleMagnetometry(VibratingSampleMagnetometry, EntryData):
             logger.error(f'Error parsing VSM file: {e}')
 
         super().normalize(archive, logger)
-
 
 m_package.__init_metainfo__()
