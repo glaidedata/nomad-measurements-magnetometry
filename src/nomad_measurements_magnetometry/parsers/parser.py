@@ -1,10 +1,8 @@
 from nomad.datamodel.datamodel import EntryArchive
 from nomad.parsing.parser import MatchingParser
 
-from nomad_measurements_magnetometry.schema_packages.agm_schema import (
+from nomad_measurements_magnetometry.schema_packages.schema_package import (
     ELNAlternatingGradientMagnetometry,
-)
-from nomad_measurements_magnetometry.schema_packages.vsm_schema import (
     ELNVibratingSampleMagnetometry,
 )
 
@@ -44,7 +42,6 @@ class LakeShoreVSMParser(MatchingParser):
         entry.data_file = mainfile.split('/')[-1]
 
         archive.data = entry
-
         entry.normalize(archive, logger)
 
 
@@ -83,5 +80,4 @@ class MicroMagAGMParser(MatchingParser):
         entry.data_file = mainfile.split('/')[-1]
 
         archive.data = entry
-
         entry.normalize(archive, logger)

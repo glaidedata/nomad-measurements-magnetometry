@@ -1,10 +1,11 @@
-# 1. Import the shared package instance first
-from .base_schema import m_package
+from nomad.config.models.plugins import SchemaPackageEntryPoint
 
-# 2. Import all your classes
-from .base_schema import *
-from .agm_schema import *
-from .vsm_schema import *
+class MagnetometrySchemaEntryPoint(SchemaPackageEntryPoint):
+    def load(self):
+        from .schema_package import m_package
+        return m_package
 
-# 3. Finalize the package metainfo
-m_package.__init_metainfo__()
+magnetometry_schema_entry_point = MagnetometrySchemaEntryPoint(
+    name='Magnetometry Schema',
+    description='Unified schema for Magnetometry (VSM and AGM) data.',
+)

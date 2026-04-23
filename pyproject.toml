@@ -129,10 +129,9 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [project.entry-points.'nomad.plugin']
-magnetometry_schema = "nomad_measurements_magnetometry:magnetometry_schema_entry_point"
+magnetometry_schema = "nomad_measurements_magnetometry.schema_packages:magnetometry_schema_entry_point"
 lakeshore_vsm_parser = "nomad_measurements_magnetometry.parsers:lakeshore_vsm_parser_entry_point"
 micromag_agm_parser = "nomad_measurements_magnetometry.parsers:micromag_agm_parser_entry_point"
-
 
 
 
