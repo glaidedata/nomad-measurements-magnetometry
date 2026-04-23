@@ -1,16 +1,29 @@
 from nomad.config.models.plugins import ParserEntryPoint
 
-
-class MagnetometryParserEntryPoint(ParserEntryPoint):
+class LakeShoreVSMParserEntryPoint(ParserEntryPoint):
     def load(self):
-        from nomad_measurements_magnetometry.parsers.parser import MagnetometryParser
+        from .parser import LakeShoreVSMParser
 
-        return MagnetometryParser(**self.model_dump())
+        return LakeShoreVSMParser(**self.dict())
 
 
-parser_entry_point = MagnetometryParserEntryPoint(
-    name='Magnetometry Parser',
-    description='Parser for Magnetometry raw files (VSM, AGM, etc.).',
-    mainfile_name_re=r'^.*\.(csv|txt)$',
-    mainfile_mime_re='text/.*',
+class MicroMagAGMParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from .parser import MicroMagAGMParser
+
+        return MicroMagAGMParser(**self.dict())
+
+
+# VSM Entry Point
+lakeshore_vsm_parser_entry_point = LakeShoreVSMParserEntryPoint(
+    name='Lake Shore VSM Parser',
+    description='Parser for Lake Shore VSM .csv data files.',
+    mainfile_name_re=r'^.*\.csv$',
+)
+
+# AGM Entry Point
+micromag_agm_parser_entry_point = MicroMagAGMParserEntryPoint(
+    name='MicroMag AGM Parser',
+    description='Parser for MicroMag AGM .txt data files.',
+    mainfile_name_re=r'^.*\.txt$',
 )

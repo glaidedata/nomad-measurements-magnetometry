@@ -1,8 +1,5 @@
-from pathlib import Path
-from typing import TYPE_CHECKING
-
-from nomad.datamodel.context import ServerContext
-from nomad.parsing import MatchingParser
+from nomad.datamodel.datamodel import EntryArchive
+from nomad.parsing.parser import MatchingParser
 
 from nomad_measurements_magnetometry.schema_packages.agm_schema import (
     ELNAlternatingGradientMagnetometry,
@@ -11,12 +8,8 @@ from nomad_measurements_magnetometry.schema_packages.vsm_schema import (
     ELNVibratingSampleMagnetometry,
 )
 
-if TYPE_CHECKING:
-    from nomad.datamodel.datamodel import EntryArchive
-    from structlog.stdlib import BoundLogger
 
-
-class MagnetometryParser(MatchingParser):
+class LakeShoreVSMParser(MatchingParser):
     def is_mainfile(
         self,
         filename: str,
@@ -25,59 +18,70 @@ class MagnetometryParser(MatchingParser):
         decoded_buffer: str,
         compression: str = None,
     ) -> bool:
-        """
-        Gatekeeper: Only returns True if the file contains VSM or AGM magic strings.
-        """
-        # 1. Standard regex check (handles the .csv and .txt extensions)
-        is_valid_ext = super().is_mainfile(
+        """Gatekeeper for Lake Shore VSM .csv files."""
+        if not super().is_mainfile(
             filename, mime, buffer, decoded_buffer, compression
-        )
-        if not is_valid_ext:
+        ):
             return False
 
-        # 2. Check for the actual headers found in your data files
-        if decoded_buffer:
-            # Lake Shore VSM signature
-            if '#RUN ON SOFTWARE VERSION' in decoded_buffer:
-                return True
-            # MicroMag AGM signature
-            if 'MicroMag 2900/3900 Data File' in decoded_buffer:
-                return True
+        # string check
+        if decoded_buffer and '#RUN ON SOFTWARE VERSION' in decoded_buffer:
+            return True
 
         return False
 
     def parse(
         self,
         mainfile: str,
-        archive: 'EntryArchive',
-        logger: 'BoundLogger' = None,
+        archive: EntryArchive,
+        logger=None,
         child_archives=None,
     ) -> None:
-        data_file = Path(mainfile).name
-        if isinstance(archive.m_context, ServerContext):
-            normalized_mainfile = mainfile.replace('\\', '/')
-            if '/raw/' in normalized_mainfile:
-                data_file = normalized_mainfile.split('/raw/', 1)[1]
-            else:
-                data_file = normalized_mainfile.rsplit('/', 1)[-1]
+        logger = logger or archive.m_context.logger
 
-        # --- The Router Logic ---
-        # Read the first chunk of the file to securely identify the signature
-        with open(mainfile, encoding='utf-8', errors='ignore') as f:
-            header_chunk = f.read(1024)
+        # Instantiate the VSM schema
+        entry = ELNVibratingSampleMagnetometry()
+        entry.data_file = mainfile.split('/')[-1]
 
-        if 'MicroMag 2900/3900 Data File' in header_chunk:
-            entry = ELNAlternatingGradientMagnetometry()
-        elif '#RUN ON SOFTWARE VERSION' in header_chunk:
-            entry = ELNVibratingSampleMagnetometry()
-        else:
-            if logger:
-                logger.error(
-                    f'Unrecognized file signature in {data_file}. No schema assigned.'
-                )
-            return
-
-        # Attach the file to the chosen schema
-        entry.data_file = data_file
         archive.data = entry
-        archive.metadata.entry_name = f'{data_file} data file'
+
+        entry.normalize(archive, logger)
+
+
+class MicroMagAGMParser(MatchingParser):
+    def is_mainfile(
+        self,
+        filename: str,
+        mime: str,
+        buffer: bytes,
+        decoded_buffer: str,
+        compression: str = None,
+    ) -> bool:
+        """Gatekeeper for MicroMag AGM .txt files."""
+        if not super().is_mainfile(
+            filename, mime, buffer, decoded_buffer, compression
+        ):
+            return False
+
+        # string check
+        if decoded_buffer and 'MicroMag 2900/3900 Data File' in decoded_buffer:
+            return True
+
+        return False
+
+    def parse(
+        self,
+        mainfile: str,
+        archive: EntryArchive,
+        logger=None,
+        child_archives=None,
+    ) -> None:
+        logger = logger or archive.m_context.logger
+
+        # Instantiate the AGM schema
+        entry = ELNAlternatingGradientMagnetometry()
+        entry.data_file = mainfile.split('/')[-1]
+
+        archive.data = entry
+
+        entry.normalize(archive, logger)
