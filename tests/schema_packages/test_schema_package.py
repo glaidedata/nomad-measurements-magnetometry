@@ -1,18 +1,50 @@
-from nomad_measurements_magnetometry.schema_packages.agm_schema import (
+import pytest
+from nomad.datamodel import EntryArchive
+from nomad_measurements_magnetometry.schema_packages.schema_package import (
     ELNAlternatingGradientMagnetometry,
-)
-from nomad_measurements_magnetometry.schema_packages.vsm_schema import (
     ELNVibratingSampleMagnetometry,
+    MagnetometrySample,
+    MagnetometryResult,
 )
 
+def test_vsm_schema_instantiation():
+    """Test that the VSM schema correctly inherits BaseMagnetometry properties."""
+    archive = EntryArchive()
+    entry = ELNVibratingSampleMagnetometry()
 
-def test_schema_instantiation():
-    """Verify that both schemas can be instantiated successfully without import/syntax errors."""
+    # Test Base properties
+    entry.measurement_type = "Hysteresis"
+    entry.software_version = "1.0.0"
 
-    vsm_entry = ELNVibratingSampleMagnetometry()
-    assert vsm_entry is not None
-    assert vsm_entry.m_def.name == 'ELNVibratingSampleMagnetometry'
+    # Test Base Subsections
+    sample = MagnetometrySample(mass=0.5, volume=1.2)
+    entry.sample_setup = sample
 
-    agm_entry = ELNAlternatingGradientMagnetometry()
-    assert agm_entry is not None
-    assert agm_entry.m_def.name == 'ELNAlternatingGradientMagnetometry'
+    res = MagnetometryResult(magnetic_field=[1.0, 2.0], magnetic_moment=[0.1, 0.2])
+    entry.results = [res]
+
+    archive.data = entry
+
+    # Assertions
+    assert archive.data.measurement_type == "Hysteresis"
+    assert archive.data.sample_setup.mass.magnitude == 0.5
+    assert len(archive.data.results[0].magnetic_field) == 2
+
+def test_agm_schema_instantiation():
+    """Test that the AGM schema correctly inherits BaseMagnetometry properties."""
+    archive = EntryArchive()
+    entry = ELNAlternatingGradientMagnetometry()
+
+    # Test Base properties
+    entry.instrument_model = "MicroMag 2900"
+
+    # Test AGM Specific properties
+    entry.data_format_version = "2.0"
+    entry.measurement_mode = "Continuous"
+
+    archive.data = entry
+
+    # Assertions
+    assert archive.data.instrument_model == "MicroMag 2900"
+    assert archive.data.data_format_version == "2.0"
+    assert archive.data.measurement_mode == "Continuous"
