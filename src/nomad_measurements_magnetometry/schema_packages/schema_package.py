@@ -15,8 +15,9 @@ m_package = SchemaPackage()
 
 # Constants for Unit Conversion (CGS to SI)
 OE_TO_AM = 1000.0 / (4.0 * np.pi)  # Oersted to A/m
-EMU_TO_AM2 = 1e-3                  # emu to A*m^2
-EMU_OE_TO_M3 = EMU_TO_AM2 / OE_TO_AM # emu/Oe to m^3
+EMU_TO_AM2 = 1e-3  # emu to A*m^2
+EMU_OE_TO_M3 = EMU_TO_AM2 / OE_TO_AM  # emu/Oe to m^3
+
 
 # ==========================================
 # 1. BASE MAGNETOMETRY
@@ -104,10 +105,12 @@ class BaseMagnetometry(Measurement):
         type=str, description='Make and model of the magnetometry instrument.'
     )
     software_version = Quantity(
-        type=str, description='Software version used to run the measurement and export data.'
+        type=str,
+        description='Software version used to run the measurement and export data.',
     )
     measurement_type = Quantity(
-        type=str, description='General classification of the measurement (e.g., Hysteresis, FORC).'
+        type=str,
+        description='General classification of the measurement (e.g., Hysteresis, FORC).',
     )
     start_time = Quantity(
         type=str, description='Timestamp when the measurement sequence began.'
@@ -124,6 +127,7 @@ class BaseMagnetometry(Measurement):
 # 2. AGM SCHEMA
 # ==========================================
 # --- 1. AGM-Specific Subsections ---
+
 
 class AGMInstrument(ArchiveSection):
     configuration = Quantity(
@@ -142,28 +146,34 @@ class AGMInstrument(ArchiveSection):
         type=str, description='Temperature unit scale (e.g., Celsius, Kelvin).'
     )
 
+
 class AGMSettings(ArchiveSection):
     field_range = Quantity(
-        type=np.float64, unit='A/m', description='Maximum magnetic field range set for the measurement.'
+        type=np.float64,
+        unit='A/m',
+        description='Maximum magnetic field range set for the measurement.',
     )
     field_command = Quantity(
         type=np.float64, unit='A/m', description='Commanded static field offset.'
     )
     moment_range = Quantity(
-        type=np.float64, unit='A * m**2', description='Full-scale moment range setting for the amplifier.'
+        type=np.float64,
+        unit='A * m**2',
+        description='Full-scale moment range setting for the amplifier.',
     )
     averaging_time = Quantity(
-        type=np.float64, unit='s', description='Time spent integrating the signal for each data point.'
+        type=np.float64,
+        unit='s',
+        description='Time spent integrating the signal for each data point.',
     )
     temperature_command = Quantity(
         type=np.float64, unit='celsius', description='Commanded setpoint temperature.'
     )
     tmprtr_difference_correction = Quantity(
-        type=str, description='Whether a temperature difference correction calibration was applied.'
+        type=str,
+        description='Whether a temperature difference correction calibration was applied.',
     )
-    orientation = Quantity(
-        type=str, description='Sample mounting orientation.'
-    )
+    orientation = Quantity(type=str, description='Sample mounting orientation.')
     gradient = Quantity(
         type=np.float64, description='Alternating gradient field magnitude.'
     )
@@ -174,14 +184,19 @@ class AGMSettings(ArchiveSection):
         type=np.float64, description='Quality factor (Q) of the piezo probe resonance.'
     )
     probe_resonance = Quantity(
-        type=np.float64, unit='Hz', description='Measured resonant frequency of the probe.'
+        type=np.float64,
+        unit='Hz',
+        description='Measured resonant frequency of the probe.',
     )
     operating_frequency = Quantity(
-        type=np.float64, unit='Hz', description='Actual frequency used for the alternating gradient.'
+        type=np.float64,
+        unit='Hz',
+        description='Actual frequency used for the alternating gradient.',
     )
     sweep_mode = Quantity(
         type=str, description='Mode of field sweeping (e.g., Automatic, Continuous).'
     )
+
 
 class AGMMeasurementDetails(ArchiveSection):
     description = Quantity(
@@ -190,10 +205,14 @@ class AGMMeasurementDetails(ArchiveSection):
         description='Free-text notes or remarks left by the experimentalist.',
     )
     field_measured = Quantity(
-        type=np.float64, unit='A/m', description='Measured static field prior to sequence start.'
+        type=np.float64,
+        unit='A/m',
+        description='Measured static field prior to sequence start.',
     )
     temperature_measured = Quantity(
-        type=np.float64, unit='celsius', description='Measured temperature prior to sequence start.'
+        type=np.float64,
+        unit='celsius',
+        description='Measured temperature prior to sequence start.',
     )
     averages_completed = Quantity(
         type=np.float64, description='Number of signal averages completed.'
@@ -201,6 +220,7 @@ class AGMMeasurementDetails(ArchiveSection):
     elapsed_time = Quantity(
         type=np.float64, unit='s', description='Total elapsed time for the measurement.'
     )
+
 
 class AGMProcessing(ArchiveSection):
     background_subtraction = Quantity(
@@ -210,13 +230,16 @@ class AGMProcessing(ArchiveSection):
         type=str, description='Indicates if Delta-M signal processing was used.'
     )
     demagnetizing_factor = Quantity(
-        type=str, description='Indicates if demagnetizing correction was applied to the field.'
+        type=str,
+        description='Indicates if demagnetizing correction was applied to the field.',
     )
     normalization = Quantity(
-        type=str, description='Strategy used for normalizing the moment (e.g., by mass, by volume).'
+        type=str,
+        description='Strategy used for normalizing the moment (e.g., by mass, by volume).',
     )
     normalization_factor = Quantity(
-        type=np.float64, description='Scalar multiplier used to normalize the moment data.'
+        type=np.float64,
+        description='Scalar multiplier used to normalize the moment data.',
     )
     offset_field = Quantity(
         type=str, description='Indicates if a static field offset was applied.'
@@ -228,55 +251,65 @@ class AGMProcessing(ArchiveSection):
         type=str, description='Indicates if pole saturation compensation was active.'
     )
     slope_correction = Quantity(
-        type=str, description='Indicates if a high-field slope (paramagnetic/diamagnetic) was corrected.'
+        type=str,
+        description='Indicates if a high-field slope (paramagnetic/diamagnetic) was corrected.',
     )
 
+
 class AGMViewport(ArchiveSection):
-    left = Quantity(
-        type=np.float64, unit='A/m', description='Left plot limit.'
-    )
-    right = Quantity(
-        type=np.float64, unit='A/m', description='Right plot limit.'
-    )
+    left = Quantity(type=np.float64, unit='A/m', description='Left plot limit.')
+    right = Quantity(type=np.float64, unit='A/m', description='Right plot limit.')
     bottom = Quantity(
         type=np.float64, unit='A * m**2', description='Bottom plot limit.'
     )
-    top = Quantity(
-        type=np.float64, unit='A * m**2', description='Top plot limit.'
-    )
+    top = Quantity(type=np.float64, unit='A * m**2', description='Top plot limit.')
     show_x_axis = Quantity(
-        type=str, description='Visibility state of the X-axis in the instrument software.'
+        type=str,
+        description='Visibility state of the X-axis in the instrument software.',
     )
     show_y_axis = Quantity(
-        type=str, description='Visibility state of the Y-axis in the instrument software.'
+        type=str,
+        description='Visibility state of the Y-axis in the instrument software.',
     )
+
 
 class AGMCharacterization(ArchiveSection):
     initial_slope = Quantity(
         type=np.float64, unit='m**3', description='Initial magnetic susceptibility.'
     )
     saturation = Quantity(
-        type=np.float64, unit='A * m**2', description='Saturation magnetization (Ms) extracted from the loop.'
+        type=np.float64,
+        unit='A * m**2',
+        description='Saturation magnetization (Ms) extracted from the loop.',
     )
     remanence = Quantity(
-        type=np.float64, unit='A * m**2', description='Remanent magnetization (Mr) extracted from the loop.'
+        type=np.float64,
+        unit='A * m**2',
+        description='Remanent magnetization (Mr) extracted from the loop.',
     )
     coercivity = Quantity(
-        type=np.float64, unit='A/m', description='Coercive field (Hc) extracted from the loop.'
+        type=np.float64,
+        unit='A/m',
+        description='Coercive field (Hc) extracted from the loop.',
     )
     s_star = Quantity(
         type=np.float64, description='S* parameter indicating loop squareness.'
     )
+
 
 class AGMScriptSegment(ArchiveSection):
     segment_number = Quantity(
         type=int, description='Sequential ID of the measurement segment.'
     )
     averaging_time = Quantity(
-        type=np.float64, unit='s', description='Signal averaging time specific to this segment.'
+        type=np.float64,
+        unit='s',
+        description='Signal averaging time specific to this segment.',
     )
     initial_field = Quantity(
-        type=np.float64, unit='A/m', description='Starting magnetic field of the segment.'
+        type=np.float64,
+        unit='A/m',
+        description='Starting magnetic field of the segment.',
     )
     field_increment = Quantity(
         type=np.float64, unit='A/m', description='Step size between field setpoints.'
@@ -285,11 +318,15 @@ class AGMScriptSegment(ArchiveSection):
         type=np.float64, unit='A/m', description='Ending magnetic field of the segment.'
     )
     pause = Quantity(
-        type=np.float64, unit='s', description='Wait time before starting data acquisition in this segment.'
+        type=np.float64,
+        unit='s',
+        description='Wait time before starting data acquisition in this segment.',
     )
     final_index = Quantity(
-        type=int, description='The array index corresponding to the end of this segment.'
+        type=int,
+        description='The array index corresponding to the end of this segment.',
     )
+
 
 class AGMScript(ArchiveSection):
     number_of_segments = Quantity(
@@ -300,7 +337,9 @@ class AGMScript(ArchiveSection):
     )
     segments = SubSection(section_def=AGMScriptSegment, repeats=True)
 
+
 # --- 2. Main AGM Schema ---
+
 
 class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
     m_def = Section(label='MicroMag AGM', a_eln=dict(lane_width='600px'))
@@ -329,9 +368,12 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
 
     def _get_cleaners(self):
         def safe_float(val):
-            if not val or val == 'N/A': return None
-            try: return float(val)
-            except ValueError: return None
+            if not val or val == 'N/A':
+                return None
+            try:
+                return float(val)
+            except ValueError:
+                return None
 
         def safe_float_oe(val):
             v = safe_float(val)
@@ -346,11 +388,20 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
             return v * EMU_OE_TO_M3 if v is not None else None
 
         def safe_int(val):
-            if not val or val == 'N/A': return None
-            try: return int(val)
-            except ValueError: return None
+            if not val or val == 'N/A':
+                return None
+            try:
+                return int(val)
+            except ValueError:
+                return None
 
-        return {'float': safe_float, 'float_oe': safe_float_oe, 'float_emu': safe_float_emu, 'float_emu_oe': safe_float_emu_oe, 'int': safe_int}
+        return {
+            'float': safe_float,
+            'float_oe': safe_float_oe,
+            'float_emu': safe_float_emu,
+            'float_emu_oe': safe_float_emu_oe,
+            'int': safe_int,
+        }
 
     def _map_hardware_and_settings(self, metadata, cleaners):
         sf, s_oe, s_emu = cleaners['float'], cleaners['float_oe'], cleaners['float_emu']
@@ -371,7 +422,9 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
                 moment_range=s_emu(metadata.get('Moment range')),
                 averaging_time=sf(metadata.get('Averaging time')),
                 temperature_command=sf(metadata.get('Temperature (command)')),
-                tmprtr_difference_correction=metadata.get('Tmprtr difference correction'),
+                tmprtr_difference_correction=metadata.get(
+                    'Tmprtr difference correction'
+                ),
                 orientation=metadata.get('Orientation'),
                 gradient=sf(metadata.get('Gradient')),
                 probe_factor=sf(metadata.get('Probe factor')),
@@ -391,7 +444,13 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
             )
 
     def _map_processing_and_script(self, metadata, agm_data, cleaners):
-        sf, s_oe, s_emu, s_emu_oe, si = cleaners['float'], cleaners['float_oe'], cleaners['float_emu'], cleaners['float_emu_oe'], cleaners['int']
+        sf, s_oe, s_emu, s_emu_oe, si = (
+            cleaners['float'],
+            cleaners['float_oe'],
+            cleaners['float_emu'],
+            cleaners['float_emu_oe'],
+            cleaners['int'],
+        )
 
         if not self.processing:
             self.processing = AGMProcessing(
@@ -463,7 +522,9 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
             self.measurement_type = metadata.get('Measurement Type')
 
             raw_time = metadata.get('Measured on')
-            self.start_time = str(raw_time).strip() if raw_time and raw_time != 'N/A' else None
+            self.start_time = (
+                str(raw_time).strip() if raw_time and raw_time != 'N/A' else None
+            )
 
             self.data_format_version = metadata.get('Data Format Version')
             self.measurement_mode = metadata.get('Measurement Mode')
@@ -472,7 +533,9 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
                 self.sample_setup = MagnetometrySample(
                     mass=cleaners['float'](metadata.get('Mass')),
                     volume=cleaners['float'](metadata.get('Volume')),
-                    demagnetizing_factor=cleaners['float'](metadata.get('Demagnetizing factor')),
+                    demagnetizing_factor=cleaners['float'](
+                        metadata.get('Demagnetizing factor')
+                    ),
                 )
 
             self._map_hardware_and_settings(metadata, cleaners)
@@ -483,8 +546,16 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
             res = self.results[0]
 
             # Apply SI Conversion to data arrays!
-            res.magnetic_field = agm_data.magnetic_field * OE_TO_AM if agm_data.magnetic_field is not None else None
-            res.magnetic_moment = agm_data.magnetic_moment * EMU_TO_AM2 if agm_data.magnetic_moment is not None else None
+            res.magnetic_field = (
+                agm_data.magnetic_field * OE_TO_AM
+                if agm_data.magnetic_field is not None
+                else None
+            )
+            res.magnetic_moment = (
+                agm_data.magnetic_moment * EMU_TO_AM2
+                if agm_data.magnetic_moment is not None
+                else None
+            )
             res.normalized_moment = agm_data.normalized_moment
 
         except Exception as e:
@@ -494,69 +565,193 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
 
         super().normalize(archive, logger)
 
+
 # ==========================================
 # 3. VSM SCHEMA
 # ==========================================
 
+
 class FieldConfigurations(ArchiveSection):
-    magnet_model = Quantity(type=str, description='Model of the electromagnet used for the applied field.')
-    power_supply = Quantity(type=str, description='Power supply model driving the magnet.')
-    magnet_mode = Quantity(type=str, description='Operational mode of the electromagnet.')
-    head_amplitude = Quantity(type=str, description='Vibrational amplitude of the VSM head.')
-    gap_settings = Quantity(type=str, description='Distance configuration between the magnet pole pieces.')
-    coil_set_name = Quantity(type=str, description='Identifier for the pickup coil configuration.')
-    coil_set_serial_number = Quantity(type=str, description='Serial number of the pickup coils.')
-    coil_set_balance_number = Quantity(type=np.float64, description='Hardware balance parameter for the coil set.')
+    magnet_model = Quantity(
+        type=str, description='Model of the electromagnet used for the applied field.'
+    )
+    power_supply = Quantity(
+        type=str, description='Power supply model driving the magnet.'
+    )
+    magnet_mode = Quantity(
+        type=str, description='Operational mode of the electromagnet.'
+    )
+    head_amplitude = Quantity(
+        type=str, description='Vibrational amplitude of the VSM head.'
+    )
+    gap_settings = Quantity(
+        type=str, description='Distance configuration between the magnet pole pieces.'
+    )
+    coil_set_name = Quantity(
+        type=str, description='Identifier for the pickup coil configuration.'
+    )
+    coil_set_serial_number = Quantity(
+        type=str, description='Serial number of the pickup coils.'
+    )
+    coil_set_balance_number = Quantity(
+        type=np.float64, description='Hardware balance parameter for the coil set.'
+    )
     moment_x_calibration_value = Quantity(
-        type=np.float64, unit='A * m**2 / V', description='Calibration multiplier linking lock-in voltage to moment (Converted from emu/V).'
+        type=np.float64,
+        unit='A * m**2 / V',
+        description='Calibration multiplier linking lock-in voltage to moment (Converted from emu/V).',
     )
     moment_x_calibration_field = Quantity(
-        type=np.float64, unit='A/m', description='Magnetic field applied during moment calibration.'
+        type=np.float64,
+        unit='A/m',
+        description='Magnetic field applied during moment calibration.',
     )
     moment_x_calibration_expected_moment = Quantity(
-        type=np.float64, unit='A * m**2', description='Theoretical reference moment of the calibration standard.'
+        type=np.float64,
+        unit='A * m**2',
+        description='Theoretical reference moment of the calibration standard.',
     )
-    moment_x_calibration_standard_id = Quantity(type=str, description='Identifier of the standard sample (e.g., Nickel sphere) used.')
-    moment_x_calibration_comments = Quantity(type=str, description='Additional notes recorded during instrument calibration.')
+    moment_x_calibration_standard_id = Quantity(
+        type=str,
+        description='Identifier of the standard sample (e.g., Nickel sphere) used.',
+    )
+    moment_x_calibration_comments = Quantity(
+        type=str, description='Additional notes recorded during instrument calibration.'
+    )
+
 
 class AdvancedAcquisitionSetup(ArchiveSection):
     acquisition_mode = Quantity(type=str, description='Lock-in acquisition style used.')
-    pause_at_plus_minus_max_fields = Quantity(type=np.float64, unit='s', description='Stabilization pause duration at maximum loop field.')
-    moment_meter_range_mode = Quantity(type=str, description='Auto-ranging or static behavior of the moment meter.')
-    gaussmeter_range_mode = Quantity(type=str, description='Auto-ranging or static behavior of the gaussmeter.')
-    gaussmeter_fixed_range = Quantity(type=str, description='Fixed range setting if auto-range is disabled.')
+    pause_at_plus_minus_max_fields = Quantity(
+        type=np.float64,
+        unit='s',
+        description='Stabilization pause duration at maximum loop field.',
+    )
+    moment_meter_range_mode = Quantity(
+        type=str, description='Auto-ranging or static behavior of the moment meter.'
+    )
+    gaussmeter_range_mode = Quantity(
+        type=str, description='Auto-ranging or static behavior of the gaussmeter.'
+    )
+    gaussmeter_fixed_range = Quantity(
+        type=str, description='Fixed range setting if auto-range is disabled.'
+    )
+
 
 class AcquisitionSetup(ArchiveSection):
-    saturation_field = Quantity(type=str, description='Nominal field used to saturate the sample.')
-    max_field = Quantity(type=str, description='Maximum absolute field reached during the loop.')
-    forc_type = Quantity(type=str, description='First-Order Reversal Curve mapping pattern.')
-    max_hc_field = Quantity(type=np.float64, unit='A/m', description='Maximum coercive field limit configured for FORC.')
-    max_hu_field = Quantity(type=np.float64, unit='A/m', description='Maximum interaction field limit configured for FORC.')
-    min_hu_field = Quantity(type=np.float64, unit='A/m', description='Minimum interaction field limit configured for FORC.')
-    calibration_field_tolerance = Quantity(type=str, description='Allowed variance in the approach to the calibration field.')
-    pause_at_calibration_field = Quantity(type=np.float64, unit='s', description='Wait time to stabilize at the calibration field.')
-    number_of_forcs = Quantity(type=np.int32, description='Total number of reversal curves measured.')
-    saturation_field_tolerance = Quantity(type=str, description='Allowed variance in the approach to the saturation field.')
-    pause_at_saturation_field = Quantity(type=np.float64, unit='s', description='Wait time to stabilize at saturation before reversing.')
-    reversal_field_tolerance = Quantity(type=str, description='Allowed variance in the approach to the reversal field (Hr).')
-    pause_at_reversal_fields = Quantity(type=np.float64, unit='s', description='Wait time to stabilize at reversal field prior to sweep.')
-    enable_subtract_last_branches = Quantity(type=bool, description='Indicates if the last major branch was subtracted from the FORCs.')
-    last_branch_iterations = Quantity(type=np.int32, description='Number of points averaged for the last branch subtraction.')
-    field_step_size = Quantity(type=np.float64, unit='A/m', description='Increment size of the applied magnetic field sweep.')
-    include_initial_curve = Quantity(type=bool, description='Indicates if the initial magnetization curve is included in the sequence.')
-    averaging_time = Quantity(type=np.float64, unit='s', description='Time spent collecting signal per data point.')
-    show_forc_diagram_on_the_fly = Quantity(type=bool, description='Indicates if software plotting of the FORC diagram was active.')
-    smoothing_factor = Quantity(type=np.float64, description='Smoothing factor applied internally by the instrument.')
-    rotate_45_degrees = Quantity(type=bool, description='Indicates if the FORC diagram coordinates were rotated to Hc/Hu.')
-    truncate_for_a_rectangle_diagram = Quantity(type=bool, description='Indicates if data outside a rectangular bounding box was discarded.')
-    number_of_contours = Quantity(type=np.int32, description='Visual contour limits set in the plotting software.')
-    correct_for_drift = Quantity(type=bool, description='Indicates if a baseline drift correction was applied.')
+    saturation_field = Quantity(
+        type=str, description='Nominal field used to saturate the sample.'
+    )
+    max_field = Quantity(
+        type=str, description='Maximum absolute field reached during the loop.'
+    )
+    forc_type = Quantity(
+        type=str, description='First-Order Reversal Curve mapping pattern.'
+    )
+    max_hc_field = Quantity(
+        type=np.float64,
+        unit='A/m',
+        description='Maximum coercive field limit configured for FORC.',
+    )
+    max_hu_field = Quantity(
+        type=np.float64,
+        unit='A/m',
+        description='Maximum interaction field limit configured for FORC.',
+    )
+    min_hu_field = Quantity(
+        type=np.float64,
+        unit='A/m',
+        description='Minimum interaction field limit configured for FORC.',
+    )
+    calibration_field_tolerance = Quantity(
+        type=str,
+        description='Allowed variance in the approach to the calibration field.',
+    )
+    pause_at_calibration_field = Quantity(
+        type=np.float64,
+        unit='s',
+        description='Wait time to stabilize at the calibration field.',
+    )
+    number_of_forcs = Quantity(
+        type=np.int32, description='Total number of reversal curves measured.'
+    )
+    saturation_field_tolerance = Quantity(
+        type=str,
+        description='Allowed variance in the approach to the saturation field.',
+    )
+    pause_at_saturation_field = Quantity(
+        type=np.float64,
+        unit='s',
+        description='Wait time to stabilize at saturation before reversing.',
+    )
+    reversal_field_tolerance = Quantity(
+        type=str,
+        description='Allowed variance in the approach to the reversal field (Hr).',
+    )
+    pause_at_reversal_fields = Quantity(
+        type=np.float64,
+        unit='s',
+        description='Wait time to stabilize at reversal field prior to sweep.',
+    )
+    enable_subtract_last_branches = Quantity(
+        type=bool,
+        description='Indicates if the last major branch was subtracted from the FORCs.',
+    )
+    last_branch_iterations = Quantity(
+        type=np.int32,
+        description='Number of points averaged for the last branch subtraction.',
+    )
+    field_step_size = Quantity(
+        type=np.float64,
+        unit='A/m',
+        description='Increment size of the applied magnetic field sweep.',
+    )
+    include_initial_curve = Quantity(
+        type=bool,
+        description='Indicates if the initial magnetization curve is included in the sequence.',
+    )
+    averaging_time = Quantity(
+        type=np.float64,
+        unit='s',
+        description='Time spent collecting signal per data point.',
+    )
+    show_forc_diagram_on_the_fly = Quantity(
+        type=bool,
+        description='Indicates if software plotting of the FORC diagram was active.',
+    )
+    smoothing_factor = Quantity(
+        type=np.float64,
+        description='Smoothing factor applied internally by the instrument.',
+    )
+    rotate_45_degrees = Quantity(
+        type=bool,
+        description='Indicates if the FORC diagram coordinates were rotated to Hc/Hu.',
+    )
+    truncate_for_a_rectangle_diagram = Quantity(
+        type=bool,
+        description='Indicates if data outside a rectangular bounding box was discarded.',
+    )
+    number_of_contours = Quantity(
+        type=np.int32, description='Visual contour limits set in the plotting software.'
+    )
+    correct_for_drift = Quantity(
+        type=bool, description='Indicates if a baseline drift correction was applied.'
+    )
     advanced_acquisition_setup = SubSection(sub_section=AdvancedAcquisitionSetup)
 
+
 class DisplaySetup(ArchiveSection):
-    x_axis = Quantity(type=str, description='Quantity plotted on the X-axis in the Lake Shore software.')
-    left_y_axis = Quantity(type=str, description='Quantity plotted on the primary Y-axis.')
-    right_y_axis = Quantity(type=str, description='Quantity plotted on the secondary Y-axis.')
+    x_axis = Quantity(
+        type=str,
+        description='Quantity plotted on the X-axis in the Lake Shore software.',
+    )
+    left_y_axis = Quantity(
+        type=str, description='Quantity plotted on the primary Y-axis.'
+    )
+    right_y_axis = Quantity(
+        type=str, description='Quantity plotted on the secondary Y-axis.'
+    )
+
 
 class ELNVibratingSampleMagnetometry(BaseMagnetometry, EntryData):
     m_def = Section(label='Lake Shore VSM')
@@ -574,9 +769,12 @@ class ELNVibratingSampleMagnetometry(BaseMagnetometry, EntryData):
         def clean_float(key, strip_str=None):
             val = metadata.get(key)
             if val:
-                if strip_str: val = val.replace(strip_str, '')
-                try: return float(val.strip())
-                except ValueError: return None
+                if strip_str:
+                    val = val.replace(strip_str, '')
+                try:
+                    return float(val.strip())
+                except ValueError:
+                    return None
             return None
 
         def clean_float_oe(key, strip_str=None):
@@ -589,23 +787,39 @@ class ELNVibratingSampleMagnetometry(BaseMagnetometry, EntryData):
 
         def clean_float_emu_v(key, strip_str=None):
             v = clean_float(key, strip_str)
-            return v * EMU_TO_AM2 if v is not None else None # Voltage is untouched, emu becomes A*m^2
+            return (
+                v * EMU_TO_AM2 if v is not None else None
+            )  # Voltage is untouched, emu becomes A*m^2
 
         def clean_int(key):
             val = metadata.get(key)
             if val:
-                try: return int(val.strip())
-                except ValueError: return None
+                try:
+                    return int(val.strip())
+                except ValueError:
+                    return None
             return None
 
         def clean_bool(key):
             val = metadata.get(key, '').strip().lower()
             return val == 'true' if val in ['true', 'false'] else None
 
-        return {'float': clean_float, 'float_oe': clean_float_oe, 'float_emu': clean_float_emu, 'float_emu_v': clean_float_emu_v, 'int': clean_int, 'bool': clean_bool}
+        return {
+            'float': clean_float,
+            'float_oe': clean_float_oe,
+            'float_emu': clean_float_emu,
+            'float_emu_v': clean_float_emu_v,
+            'int': clean_int,
+            'bool': clean_bool,
+        }
 
     def _map_acquisition_and_display(self, metadata, cleaners):
-        cf, c_oe, ci, cb = cleaners['float'], cleaners['float_oe'], cleaners['int'], cleaners['bool']
+        cf, c_oe, ci, cb = (
+            cleaners['float'],
+            cleaners['float_oe'],
+            cleaners['int'],
+            cleaners['bool'],
+        )
 
         acq = AcquisitionSetup()
         acq.saturation_field = metadata.get('Saturation field')
@@ -649,7 +863,12 @@ class ELNVibratingSampleMagnetometry(BaseMagnetometry, EntryData):
         self.display_setup = ds
 
     def _map_sample_and_configs(self, metadata, cleaners):
-        cf, c_oe, c_emu, c_emu_v = cleaners['float'], cleaners['float_oe'], cleaners['float_emu'], cleaners['float_emu_v']
+        cf, c_oe, c_emu, c_emu_v = (
+            cleaners['float'],
+            cleaners['float_oe'],
+            cleaners['float_emu'],
+            cleaners['float_emu_v'],
+        )
 
         fc = FieldConfigurations()
         fc.magnet_model = metadata.get('Magnet')
@@ -660,10 +879,16 @@ class ELNVibratingSampleMagnetometry(BaseMagnetometry, EntryData):
         fc.coil_set_name = metadata.get('Coil set name')
         fc.coil_set_serial_number = metadata.get('Coil set serial number')
         fc.coil_set_balance_number = cf('Coil set balance number')
-        fc.moment_x_calibration_value = c_emu_v('Moment X calibration value', 'emu/volt')
+        fc.moment_x_calibration_value = c_emu_v(
+            'Moment X calibration value', 'emu/volt'
+        )
         fc.moment_x_calibration_field = c_oe('Moment X calibration field', 'Oe')
-        fc.moment_x_calibration_expected_moment = c_emu('Moment X calibration expected moment', 'emu')
-        fc.moment_x_calibration_standard_id = metadata.get('Moment X calibration standard ID')
+        fc.moment_x_calibration_expected_moment = c_emu(
+            'Moment X calibration expected moment', 'emu'
+        )
+        fc.moment_x_calibration_standard_id = metadata.get(
+            'Moment X calibration standard ID'
+        )
         fc.moment_x_calibration_comments = metadata.get('Moment X calibration comments')
         self.field_configurations = fc
 
@@ -711,12 +936,21 @@ class ELNVibratingSampleMagnetometry(BaseMagnetometry, EntryData):
             res.moment_status = vsm_data.moment_status
 
             # Apply SI Conversion to data arrays!
-            res.magnetic_field = vsm_data.magnetic_field * OE_TO_AM if vsm_data.magnetic_field is not None else None
-            res.magnetic_moment = vsm_data.magnetic_moment * EMU_TO_AM2 if vsm_data.magnetic_moment is not None else None
+            res.magnetic_field = (
+                vsm_data.magnetic_field * OE_TO_AM
+                if vsm_data.magnetic_field is not None
+                else None
+            )
+            res.magnetic_moment = (
+                vsm_data.magnetic_moment * EMU_TO_AM2
+                if vsm_data.magnetic_moment is not None
+                else None
+            )
 
         except Exception as e:
             logger.error(f'Error parsing VSM file: {e}')
 
         super().normalize(archive, logger)
+
 
 m_package.__init_metainfo__()
