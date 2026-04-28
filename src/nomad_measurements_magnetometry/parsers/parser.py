@@ -17,9 +17,7 @@ class LakeShoreVSMParser(MatchingParser):
         compression: str = None,
     ) -> bool:
         """Gatekeeper for Lake Shore VSM .csv files."""
-        if not super().is_mainfile(
-            filename, mime, buffer, decoded_buffer, compression
-        ):
+        if not super().is_mainfile(filename, mime, buffer, decoded_buffer, compression):
             return False
 
         # string check
@@ -39,7 +37,7 @@ class LakeShoreVSMParser(MatchingParser):
 
         # Instantiate the VSM schema
         entry = ELNVibratingSampleMagnetometry()
-        entry.data_file = mainfile.split('/')[-1]
+        entry.data_file = mainfile.rsplit('/', maxsplit=1)[-1]
 
         archive.data = entry
         entry.normalize(archive, logger)
@@ -55,9 +53,7 @@ class MicroMagAGMParser(MatchingParser):
         compression: str = None,
     ) -> bool:
         """Gatekeeper for MicroMag AGM .txt files."""
-        if not super().is_mainfile(
-            filename, mime, buffer, decoded_buffer, compression
-        ):
+        if not super().is_mainfile(filename, mime, buffer, decoded_buffer, compression):
             return False
 
         # string check
@@ -77,7 +73,7 @@ class MicroMagAGMParser(MatchingParser):
 
         # Instantiate the AGM schema
         entry = ELNAlternatingGradientMagnetometry()
-        entry.data_file = mainfile.split('/')[-1]
+        entry.data_file = mainfile.rsplit('/', maxsplit=1)[-1]
 
         archive.data = entry
         entry.normalize(archive, logger)

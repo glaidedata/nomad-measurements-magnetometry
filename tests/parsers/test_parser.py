@@ -1,25 +1,30 @@
-import os
-import logging
 import contextlib
+import logging
+import os
+
 from nomad.datamodel import EntryArchive, EntryMetadata
+
 from nomad_measurements_magnetometry.parsers.parser import (
     LakeShoreVSMParser,
     MicroMagAGMParser,
 )
 
+
 # Get the path to the dummy data folder
 def get_data_path(filename):
-    return os.path.join(
-        os.path.dirname(__file__), '..', 'data', filename
-    )
+    return os.path.join(os.path.dirname(__file__), '..', 'data', filename)
+
 
 class MockContext:
     """Mocks the NOMAD processing context to bypass the database lookup in tests."""
+
     @contextlib.contextmanager
     def raw_file(self, path, *args, **kwargs):
         class MockFile:
             name = get_data_path(path)
+
         yield MockFile()
+
 
 def test_lakeshore_vsm_parser():
     # 1. Setup
@@ -53,6 +58,7 @@ def test_lakeshore_vsm_parser():
     assert archive.data.results[0].magnetic_field is not None
     assert archive.data.results[0].magnetic_moment is not None
 
+
 def test_micromag_agm_parser():
     # 1. Setup
     parser = MicroMagAGMParser()
@@ -72,7 +78,9 @@ def test_micromag_agm_parser():
     assert archive.data.m_def.name == 'ELNAlternatingGradientMagnetometry'
 
     # Check that base schema inheritance works
-    assert hasattr(archive.data, 'start_time') # Prove the base property exists, even if None
+    assert hasattr(
+        archive.data, 'start_time'
+    )  # Prove the base property exists, even if None
     assert archive.data.instrument_model is not None
 
     # Check specific AGM subsections
