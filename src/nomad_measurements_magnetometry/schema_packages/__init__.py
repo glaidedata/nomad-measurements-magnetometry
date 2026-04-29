@@ -1,16 +1,14 @@
 from nomad.config.models.plugins import SchemaPackageEntryPoint
 
 
-class NewSchemaPackageEntryPoint(SchemaPackageEntryPoint):
+class MagnetometrySchemaEntryPoint(SchemaPackageEntryPoint):
     def load(self):
-        from nomad_measurements_magnetometry.schema_packages.schema_package import (
-            m_package,
-        )
+        from .schema_package import m_package
 
         return m_package
 
 
-schema_package_entry_point = NewSchemaPackageEntryPoint(
+magnetometry_schema_entry_point = MagnetometrySchemaEntryPoint(
     name='Magnetometry Schema',
-    description='Schema for Magnetometry (VSM, etc) data.',
+    description='Unified schema for Magnetometry (VSM and AGM) data.',
 )
