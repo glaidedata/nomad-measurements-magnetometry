@@ -28,10 +28,12 @@ def test_vsm_schema_instantiation():
 
     # Assertions
     assert archive.data.measurement_type == 'Hysteresis'
-    MASS_MAGNITUDE = 0.5
-    assert archive.data.sample_setup.mass.magnitude == MASS_MAGNITUDE
-    MAGNETIC_FIELD_LENGTH = 2
-    assert len(archive.data.results[0].magnetic_field) == MAGNETIC_FIELD_LENGTH
+
+    mass_magnitude = 0.5
+    assert archive.data.sample_setup.mass.magnitude == mass_magnitude
+
+    magnetic_field_length = 2
+    assert len(archive.data.results[0].magnetic_field) == magnetic_field_length
 
 
 def test_agm_schema_instantiation():
