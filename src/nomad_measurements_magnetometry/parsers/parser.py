@@ -1,9 +1,12 @@
+from nomad.datamodel.context import ServerContext
 from nomad.datamodel.datamodel import EntryArchive
 from nomad.parsing.parser import MatchingParser
+from nomad_measurements.utils import create_archive
 
 from nomad_measurements_magnetometry.schema_packages.schema_package import (
     ELNAlternatingGradientMagnetometry,
     ELNVibratingSampleMagnetometry,
+    RawFileMagnetometryData,
 )
 
 
@@ -35,12 +38,25 @@ class LakeShoreVSMParser(MatchingParser):
     ) -> None:
         logger = logger or archive.m_context.logger
 
+        # Extract the filename, handling server context paths correctly
+        data_file = mainfile.rsplit('/', maxsplit=1)[-1]
+        if isinstance(archive.m_context, ServerContext):
+            data_file = mainfile.split('/raw/', 1)[1]
+
         # Instantiate the VSM schema
         entry = ELNVibratingSampleMagnetometry()
-        entry.data_file = mainfile.rsplit('/', maxsplit=1)[-1]
+        entry.data_file = data_file
 
-        archive.data = entry
-        entry.normalize(archive, logger)
+        # Create the separate editable .archive.json file to preserve ELN edits
+        archive_name = f'{"".join(data_file.split(".")[:-1])}.archive.json'
+
+        # Link the raw file to the generated ELN using the placeholder
+        archive.data = RawFileMagnetometryData(
+            measurement=create_archive(entry, archive, archive_name)
+        )
+
+        # Clean up the display name in the GUI
+        archive.metadata.entry_name = f'{data_file} data file'
 
 
 class MicroMagAGMParser(MatchingParser):
@@ -71,9 +87,22 @@ class MicroMagAGMParser(MatchingParser):
     ) -> None:
         logger = logger or archive.m_context.logger
 
+        # Extract the filename, handling server context paths correctly
+        data_file = mainfile.rsplit('/', maxsplit=1)[-1]
+        if isinstance(archive.m_context, ServerContext):
+            data_file = mainfile.split('/raw/', 1)[1]
+
         # Instantiate the AGM schema
         entry = ELNAlternatingGradientMagnetometry()
-        entry.data_file = mainfile.rsplit('/', maxsplit=1)[-1]
+        entry.data_file = data_file
 
-        archive.data = entry
-        entry.normalize(archive, logger)
+        # Create the separate editable .archive.json file to preserve ELN edits
+        archive_name = f'{"".join(data_file.split(".")[:-1])}.archive.json'
+
+        # Link the raw file to the generated ELN using the placeholder
+        archive.data = RawFileMagnetometryData(
+            measurement=create_archive(entry, archive, archive_name)
+        )
+
+        # Clean up the display name in the GUI
+        archive.metadata.entry_name = f'{data_file} data file'

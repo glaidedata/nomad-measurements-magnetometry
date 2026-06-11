@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 import numpy as np
+from ientrance_instruments.schema_packages.schema_package import IEntranceInstrument
 from nomad.datamodel.data import ArchiveSection, EntryData
 from nomad.datamodel.metainfo.annotations import ELNAnnotation, ELNComponentEnum
 from nomad.datamodel.metainfo.basesections import Measurement, MeasurementResult
@@ -101,6 +102,9 @@ class MagnetometryResult(MeasurementResult):
 
 
 class BaseMagnetometry(Measurement):
+    # Hidden field to preload the custom schema and prevent GUI crashes
+    _instrument_schema_preload = Quantity(type=IEntranceInstrument)
+
     instrument_model = Quantity(
         type=str, description='Make and model of the magnetometry instrument.'
     )
@@ -511,8 +515,11 @@ class ELNAlternatingGradientMagnetometry(BaseMagnetometry, EntryData):
             return
 
         try:
-            with archive.m_context.raw_file(self.data_file) as file:
-                agm_data = read_micromag_agm(file.name)
+            # Get the absolute OS path directly
+            file_path = archive.m_context.upload_files.raw_file_object(
+                self.data_file
+            ).os_path
+            agm_data = read_micromag_agm(file_path)
 
             metadata = agm_data.metadata
             cleaners = self._get_cleaners()
@@ -910,8 +917,11 @@ class ELNVibratingSampleMagnetometry(BaseMagnetometry, EntryData):
             return
 
         try:
-            with archive.m_context.raw_file(self.data_file) as file:
-                vsm_data = read_lakeshore_vsm(file.name)
+            # Get the absolute OS path directly
+            file_path = archive.m_context.upload_files.raw_file_object(
+                self.data_file
+            ).os_path
+            vsm_data = read_lakeshore_vsm(file_path)
 
             cleaners = self._get_cleaners(vsm_data.metadata)
 
@@ -951,6 +961,18 @@ class ELNVibratingSampleMagnetometry(BaseMagnetometry, EntryData):
             logger.error(f'Error parsing VSM file: {e}')
 
         super().normalize(archive, logger)
+
+
+class RawFileMagnetometryData(EntryData):
+    """Placeholder for the raw magnetometry file to point to the generated ELN."""
+
+    m_def = Section(label='Raw Magnetometry Data File')
+
+    measurement = Quantity(
+        type=BaseMagnetometry,
+        a_eln=dict(component=ELNComponentEnum.ReferenceEditQuantity),
+        description='The editable ELN archive generated from this raw file.',
+    )
 
 
 m_package.__init_metainfo__()
