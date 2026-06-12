@@ -14,7 +14,7 @@ classifiers = [
 ]
 name = "nomad-measurements-magnetometry"
 description = "NOMAD plugin for magnetometry measurements"
-version = "0.3.1"
+version = "0.3.2"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -32,7 +32,7 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/abbasgholami71/measurements-magnetometry"
+Repository = "https://github.com/glaidedata/measurements-magnetometry"
 
 [project.optional-dependencies]
 dev = [
