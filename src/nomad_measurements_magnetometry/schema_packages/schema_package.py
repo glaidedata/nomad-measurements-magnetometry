@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 import numpy as np
-from ientrance_instruments.schema_packages.schema_package import IEntranceInstrument
 from nomad.datamodel.data import ArchiveSection, EntryData
 from nomad.datamodel.metainfo.annotations import ELNAnnotation, ELNComponentEnum
 from nomad.datamodel.metainfo.basesections import Measurement, MeasurementResult
@@ -102,9 +101,6 @@ class MagnetometryResult(MeasurementResult):
 
 
 class BaseMagnetometry(Measurement):
-    # Hidden field to preload the custom schema and prevent GUI crashes
-    _instrument_schema_preload = Quantity(type=IEntranceInstrument)
-
     instrument_model = Quantity(
         type=str, description='Make and model of the magnetometry instrument.'
     )
